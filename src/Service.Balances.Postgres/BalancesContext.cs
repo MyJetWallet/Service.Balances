@@ -65,7 +65,6 @@ namespace Service.Balances.Postgres
 
                 var result = await Database.ExecuteSqlRawAsync(sql);
 
-                Console.WriteLine($"Insert Or Update: {result}");
                 countInsert += result;
             }
 
