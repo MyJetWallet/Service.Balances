@@ -7,10 +7,12 @@ using Microsoft.Extensions.Hosting;
 using Autofac;
 using MyJetWallet.Sdk.GrpcMetrics;
 using MyJetWallet.Sdk.GrpcSchema;
+using MyJetWallet.Sdk.Postgres;
 using Prometheus;
 using ProtoBuf.Grpc.Server;
 using Service.Balances.Grpc;
 using Service.Balances.Modules;
+using Service.Balances.Postgres;
 using Service.Balances.Services;
 using SimpleTrading.BaseMetrics;
 using SimpleTrading.ServiceStatusReporterConnector;
@@ -28,6 +30,8 @@ namespace Service.Balances
             });
 
             services.AddHostedService<ApplicationLifetimeManager>();
+
+            services.AddDatabase(BalancesContext.Schema, Program.Settings.PostgresConnectionString, o => new BalancesContext(o));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
