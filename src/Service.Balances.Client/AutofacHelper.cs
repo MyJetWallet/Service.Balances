@@ -8,7 +8,7 @@ namespace Service.Balances.Client
 {
     public static class AutofacHelper
     {
-        public static void RegisterClientWalletsClients(this ContainerBuilder builder, string balancesGrpcServiceUrl, IMyNoSqlSubscriber myNoSqlSubscriber)
+        public static void RegisterBalancesClients(this ContainerBuilder builder, string balancesGrpcServiceUrl, IMyNoSqlSubscriber myNoSqlSubscriber)
         {
             var subs = new MyNoSqlReadRepository<WalletBalanceNoSqlEntity>(myNoSqlSubscriber, WalletBalanceNoSqlEntity.TableName);
             
