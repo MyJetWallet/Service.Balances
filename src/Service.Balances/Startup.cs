@@ -51,7 +51,7 @@ namespace Service.Balances
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcSchema<HelloService, IHelloService>();
+                endpoints.MapGrpcSchema<WalletBalanceService, IWalletBalanceService>();
 
                 endpoints.MapGrpcSchemaRegistry();
 

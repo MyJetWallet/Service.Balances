@@ -4,6 +4,7 @@ using MyNoSqlServer.Abstractions;
 using MyServiceBus.TcpClient;
 using Service.Balances.Domain.Models;
 using Service.Balances.Jobs;
+using Service.Balances.Services;
 using Service.MatchingEngine.EventBridge.ServiceBus;
 
 namespace Service.Balances.Modules
@@ -36,6 +37,11 @@ namespace Service.Balances.Modules
                 .RegisterType<NoSqlCleanupJob>()
                 .As<IStartable>()
                 .AutoActivate()
+                .SingleInstance();
+
+            builder
+                .RegisterType<BalanceCacheManager>()
+                .As<IBalanceCacheManager>()
                 .SingleInstance();
         }
 

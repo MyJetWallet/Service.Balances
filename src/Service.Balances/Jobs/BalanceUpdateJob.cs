@@ -6,25 +6,24 @@ using DotNetCoreDecorators;
 using ME.Contracts.OutgoingMessages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MyNoSqlServer.Abstractions;
-using Newtonsoft.Json;
 using Service.Balances.Domain.Models;
 using Service.Balances.Postgres;
+using Service.Balances.Services;
 
 namespace Service.Balances.Jobs
 {
     public class BalanceUpdateJob
     {
-        private readonly IMyNoSqlServerDataWriter<WalletBalanceNoSqlEntity> _writer;
+        private readonly IBalanceCacheManager _cacheManager;
         private readonly ILogger<BalanceUpdateJob> _logger;
         private readonly DbContextOptionsBuilder<BalancesContext> _dbContextOptionsBuilder;
 
-        public BalanceUpdateJob(ISubscriber<IReadOnlyList<MeEvent>> subscriber, 
-            IMyNoSqlServerDataWriter<WalletBalanceNoSqlEntity> writer,
+        public BalanceUpdateJob(ISubscriber<IReadOnlyList<MeEvent>> subscriber,
+            IBalanceCacheManager cacheManager,
             ILogger<BalanceUpdateJob> logger,
             DbContextOptionsBuilder<BalancesContext> dbContextOptionsBuilder)
         {
-            _writer = writer;
+            _cacheManager = cacheManager;
             _logger = logger;
             _dbContextOptionsBuilder = dbContextOptionsBuilder;
             subscriber.Subscribe(HandleEvents);
@@ -55,7 +54,7 @@ namespace Service.Balances.Jobs
 
                 await SaveBalanceUpdateToDatabaseAsync(updates);
 
-                await SaveInNoSqlCache(updates);
+                await _cacheManager.SaveInNoSqlCache(updates);
             }
             catch (Exception ex)
             {
@@ -75,44 +74,6 @@ namespace Service.Balances.Jobs
         private BalancesContext GetDbContext()
         {
             return new BalancesContext(_dbContextOptionsBuilder.Options);
-        }
-
-        private async Task SaveInNoSqlCache(List<BalanceEntity> updates)
-        {
-            var wallets = updates.Select(e => e.WalletId).Distinct();
-
-            foreach (var wallet in updates.GroupBy(e => e.WalletId))
-            {
-                if (!await IsWalletExistInCache(wallet.Key))
-                {
-                    await AddWalletToCache(wallet.Key);
-                }
-                else
-                {
-                    var data = wallet.Select(e => WalletBalanceNoSqlEntity.Create(e.WalletId, e)).ToList();
-                    await _writer.BulkInsertOrReplaceAsync(data);
-                }
-            }
-        }
-
-        private async ValueTask<bool> IsWalletExistInCache(string walletId)
-        {
-            var entityList = await _writer.GetAsync(WalletBalanceNoSqlEntity.GeneratePartitionKey(walletId));
-
-            return entityList != null && entityList.Any();
-        }
-
-        private async ValueTask<List<WalletBalanceNoSqlEntity>> AddWalletToCache(string walletId)
-        {
-            await using var ctx = GetDbContext();
-
-            var balances = ctx.Balances.Where(e => e.WalletId == walletId);
-
-            var entityList = await balances.Select(e => WalletBalanceNoSqlEntity.Create(e.WalletId, e)).ToListAsync();
-
-            await _writer.BulkInsertOrReplaceAsync(entityList);
-
-            return entityList;
         }
     }
 }

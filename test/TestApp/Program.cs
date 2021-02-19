@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
+using MyNoSqlServer.DataReader;
+using Newtonsoft.Json;
 using ProtoBuf.Grpc.Client;
 using Service.Balances.Client;
+using Service.Balances.Domain.Models;
 using Service.Balances.Grpc.Models;
 
 namespace TestApp
@@ -16,11 +19,31 @@ namespace TestApp
             Console.ReadLine();
 
 
-            var factory = new BalancesClientFactory("http://localhost:5001");
-            var client = factory.GetHelloService();
+            var myNoSqlClient = new MyNoSqlTcpClient(() => "192.168.10.80:5125", "Test-app");
 
-            var resp = await  client.SayHelloAsync(new HelloRequest(){Name = "Alex"});
-            Console.WriteLine(resp?.Message);
+            var subs = new MyNoSqlReadRepository<WalletBalanceNoSqlEntity>(myNoSqlClient, WalletBalanceNoSqlEntity.TableName);
+
+
+            myNoSqlClient.Start();
+            await Task.Delay(2000);
+            
+            var factory = new BalancesClientFactory("http://localhost:80", subs);
+            var client = factory.GetWalletBalanceService();
+
+            var resp = await client.GetWalletBalancesAsync(new GetWalletBalancesRequest()
+            {
+                WalletId = "manual-test-w-003"
+            });
+            Console.WriteLine(JsonConvert.SerializeObject(resp, Formatting.Indented));
+
+            await Task.Delay(3000);
+            Console.WriteLine();
+
+            resp = await client.GetWalletBalancesAsync(new GetWalletBalancesRequest()
+            {
+                WalletId = "manual-test-w-003"
+            });
+            Console.WriteLine(JsonConvert.SerializeObject(resp, Formatting.Indented));
 
             Console.WriteLine("End");
             Console.ReadLine();

@@ -19,6 +19,11 @@ namespace Service.Balances.Domain.Models
             SequenceId = sequenceId;
         }
 
+        public WalletBalance(WalletBalance balance)
+           :this(balance.AssetId, balance.Balance, balance.Reserve, balance.LastUpdate, balance.SequenceId)
+        {
+        }
+
         [DataMember(Order = 1)]
         public string AssetId { get; set; }
 
