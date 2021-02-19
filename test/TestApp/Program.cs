@@ -45,6 +45,15 @@ namespace TestApp
             });
             Console.WriteLine(JsonConvert.SerializeObject(resp, Formatting.Indented));
 
+            await Task.Delay(3000);
+            Console.WriteLine();
+
+            resp = await client.GetWalletBalancesAsync(new GetWalletBalancesRequest()
+            {
+                WalletId = "alex--default"
+            });
+            Console.WriteLine(JsonConvert.SerializeObject(resp, Formatting.Indented));
+
             Console.WriteLine("End");
             Console.ReadLine();
         }
