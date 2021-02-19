@@ -25,11 +25,12 @@ namespace Service.Balances.Client
             if (data != null && data.Any())
             {
                 var res = data
+                    .Where(e => e.IsReal)
                     .Where(e => string.IsNullOrEmpty(request.Symbol) || e.Balance.AssetId == request.Symbol)
                     .Select(e => e.Balance)
                     .ToList();
 
-                return Task.FromResult(new WalletBalanceList() {Balances = res});
+                return Task.FromResult( new WalletBalanceList() {Balances = res} );
             }
 
             return _service.GetWalletBalancesAsync(request);

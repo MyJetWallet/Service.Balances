@@ -51,6 +51,7 @@ namespace Service.Balances.Services
             var balances = ctx.Balances.Where(e => e.WalletId == walletId);
 
             var entityList = await balances.Select(e => WalletBalanceNoSqlEntity.Create(e.WalletId, e)).ToListAsync();
+            entityList.Add(WalletBalanceNoSqlEntity.None(walletId));
 
             await _writer.BulkInsertOrReplaceAsync(entityList);
 

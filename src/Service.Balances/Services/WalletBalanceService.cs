@@ -23,6 +23,7 @@ namespace Service.Balances.Services
             var result = new WalletBalanceList()
             {
                 Balances = data
+                    .Where(e => e.IsReal)
                     .Where(e => string.IsNullOrEmpty(request.Symbol) || e.Balance.AssetId == request.Symbol)
                     .Select(e => new WalletBalance(e.Balance))
                     .ToList()
