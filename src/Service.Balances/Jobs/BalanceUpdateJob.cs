@@ -18,7 +18,7 @@ namespace Service.Balances.Jobs
         private readonly ILogger<BalanceUpdateJob> _logger;
         private readonly DbContextOptionsBuilder<BalancesContext> _dbContextOptionsBuilder;
 
-        public BalanceUpdateJob(ISubscriber<IReadOnlyList<MeEvent>> subscriber,
+        public BalanceUpdateJob(ISubscriber<IReadOnlyList<OutgoingEvent>> subscriber,
             IBalanceCacheManager cacheManager,
             ILogger<BalanceUpdateJob> logger,
             DbContextOptionsBuilder<BalancesContext> dbContextOptionsBuilder)
@@ -29,7 +29,7 @@ namespace Service.Balances.Jobs
             subscriber.Subscribe(HandleEvents);
         }
 
-        private async ValueTask HandleEvents(IReadOnlyList<MeEvent> events)
+        private async ValueTask HandleEvents(IReadOnlyList<OutgoingEvent> events)
         {
             _logger.LogDebug("Receive {count} events", events.Count);
 
@@ -58,7 +58,7 @@ namespace Service.Balances.Jobs
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Cannot handle batch of MeEvent's");
+                _logger.LogError(ex, "Cannot handle batch of OutgoingEvent's");
                 throw;
             }
         }

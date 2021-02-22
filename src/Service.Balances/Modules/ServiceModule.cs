@@ -14,16 +14,6 @@ namespace Service.Balances.Modules
         protected override void Load(ContainerBuilder builder)
         {
             RegisterMyNoSqlWriter<WalletBalanceNoSqlEntity>(builder, WalletBalanceNoSqlEntity.TableName);
-        }
-
-        private void RegisterMyNoSqlWriter<TEntity>(ContainerBuilder builder, string table)
-            where TEntity : IMyNoSqlDbEntity, new()
-        {
-            builder.Register(ctx => new MyNoSqlServer.DataWriter.MyNoSqlServerDataWriter<TEntity>(
-                    Program.ReloadedSettings(e => e.MyNoSqlWriterUrl), table, true))
-                .As<IMyNoSqlServerDataWriter<TEntity>>()
-                .SingleInstance();
-
 
             var serviceBusClient = new MyServiceBusTcpClient(Program.ReloadedSettings(e => e.SpotServiceBusHostPort), ApplicationEnvironment.HostName);
             builder.RegisterInstance(serviceBusClient).AsSelf().SingleInstance();
@@ -42,6 +32,16 @@ namespace Service.Balances.Modules
             builder
                 .RegisterType<BalanceCacheManager>()
                 .As<IBalanceCacheManager>()
+                .SingleInstance();
+
+        }
+
+        private void RegisterMyNoSqlWriter<TEntity>(ContainerBuilder builder, string table)
+            where TEntity : IMyNoSqlDbEntity, new()
+        {
+            builder.Register(ctx => new MyNoSqlServer.DataWriter.MyNoSqlServerDataWriter<TEntity>(
+                    Program.ReloadedSettings(e => e.MyNoSqlWriterUrl), table, true))
+                .As<IMyNoSqlServerDataWriter<TEntity>>()
                 .SingleInstance();
         }
 
