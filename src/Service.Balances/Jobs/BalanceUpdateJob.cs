@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using DotNetCoreDecorators;
@@ -32,6 +33,8 @@ namespace Service.Balances.Jobs
         private async ValueTask HandleEvents(IReadOnlyList<OutgoingEvent> events)
         {
             _logger.LogDebug("Receive {count} events", events.Count);
+            var sw = new Stopwatch();
+            sw.Start();
 
             try
             {
@@ -61,6 +64,9 @@ namespace Service.Balances.Jobs
                 _logger.LogError(ex, "Cannot handle batch of OutgoingEvent's");
                 throw;
             }
+
+            sw.Stop();
+            _logger.LogDebug("Handled {count} events. Time: {timeRangeText}", events.Count, sw.Elapsed.ToString());
         }
 
         private async Task SaveBalanceUpdateToDatabaseAsync(List<BalanceEntity> updates)
