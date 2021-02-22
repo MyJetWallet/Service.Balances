@@ -19,9 +19,10 @@ namespace Service.Balances.Services
             _dbContextOptionsBuilder = dbContextOptionsBuilder;
         }
 
+        //todo: add metrics for this method
         public async Task SaveInNoSqlCache(List<BalanceEntity> updates)
         {
-            var wallets = updates.Select(e => e.WalletId).Distinct();
+            var list = new List<WalletBalanceNoSqlEntity>();
 
             foreach (var wallet in updates.GroupBy(e => e.WalletId))
             {
@@ -31,17 +32,20 @@ namespace Service.Balances.Services
                 }
                 else
                 {
-                    var data = wallet.Select(e => WalletBalanceNoSqlEntity.Create(e.WalletId, e)).ToList();
-                    await _writer.BulkInsertOrReplaceAsync(data);
+                    var data = wallet.Select(e => WalletBalanceNoSqlEntity.Create(e.WalletId, e));
+                    list.AddRange(data);
                 }
             }
+
+            await _writer.BulkInsertOrReplaceAsync(list);
         }
+
 
         public async ValueTask<bool> IsWalletExistInCache(string walletId)
         {
-            var entityList = await _writer.GetAsync(WalletBalanceNoSqlEntity.GeneratePartitionKey(walletId));
+            var entity = await _writer.GetAsync(WalletBalanceNoSqlEntity.GeneratePartitionKey(walletId), WalletBalanceNoSqlEntity.NoneRowKey);
 
-            return entityList != null && entityList.Any();
+            return entity != null;
         }
 
         public async ValueTask<List<WalletBalanceNoSqlEntity>> AddWalletToCache(string walletId)
