@@ -51,10 +51,8 @@ namespace Service.Balances.Postgres
                     paramString += string.Format(_sqlInsertValues, 
                         entity.WalletId, 
                         entity.AssetId,
-                        //entity.BrokerId,
-                        //entity.ClientId,
-                        entity.WalletId,
-                        entity.WalletId,
+                        entity.BrokerId,
+                        entity.ClientId,
                         entity.Balance.ToString(CultureInfo.InvariantCulture),
                         entity.Reserve.ToString(CultureInfo.InvariantCulture),
                         entity.LastUpdate.ToString("O"),
@@ -65,9 +63,17 @@ namespace Service.Balances.Postgres
 
                 var sql = $"{_sqlInsert} {paramString} {_sqlInsertWhere}";
 
-                var result = await Database.ExecuteSqlRawAsync(sql);
+                try
+                {
+                    var result = await Database.ExecuteSqlRawAsync(sql);
 
-                countInsert += result;
+                    countInsert += result;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"InsertOrUpdateAsync exception:\n{ex}\n{sql}");
+                    throw;
+                }
             }
 
             return countInsert;
