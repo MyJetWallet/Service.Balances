@@ -8,6 +8,7 @@ using Autofac;
 using MyJetWallet.Sdk.GrpcMetrics;
 using MyJetWallet.Sdk.GrpcSchema;
 using MyJetWallet.Sdk.Postgres;
+using MyJetWallet.Sdk.Service;
 using Prometheus;
 using ProtoBuf.Grpc.Server;
 using Service.Balances.Grpc;
@@ -32,6 +33,8 @@ namespace Service.Balances
             services.AddHostedService<ApplicationLifetimeManager>();
 
             services.AddDatabase(BalancesContext.Schema, Program.Settings.PostgresConnectionString, o => new BalancesContext(o));
+
+            services.AddMyTelemetry(Program.Settings.ZipkinUrl);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -19,5 +19,8 @@ namespace Service.Balances.Settings
 
         [YamlProperty("Balances.MaxClientInCache")]
         public int MaxClientInCache { get; set; }
+
+        [YamlProperty("Balances.ZipkinUrl")]
+        public string ZipkinUrl { get; set; }
     }
 }

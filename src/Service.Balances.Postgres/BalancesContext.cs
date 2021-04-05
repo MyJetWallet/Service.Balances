@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MyJetWallet.Sdk.Service;
 
 namespace Service.Balances.Postgres
 {
@@ -14,9 +16,12 @@ namespace Service.Balances.Postgres
 
         public DbSet<BalanceEntity> Balances { get; set; }
 
+        private readonly Activity _activity;
+
         public BalancesContext(DbContextOptions options) : base(options)
         {
             InitSqlStatement();
+            _activity = MyTelemetry.StartActivity($"Database context {Schema}").AddTag("db-schema", Schema);
         }
 
 
@@ -32,6 +37,12 @@ namespace Service.Balances.Postgres
             modelBuilder.Entity<BalanceEntity>().Property(e => e.Reserve).HasPrecision(20);
 
             base.OnModelCreating(modelBuilder);
+        }
+
+        public override void Dispose()
+        {
+            _activity?.Dispose();
+            base.Dispose();
         }
 
         public async Task<int> InsertOrUpdateAsync(IEnumerable<BalanceEntity> entities)
@@ -82,7 +93,7 @@ namespace Service.Balances.Postgres
         private string _sqlInsert;
         private string _sqlInsertValues;
         private string _sqlInsertWhere;
-
+        
         private void InitSqlStatement()
         {
             // ReSharper disable once EntityNameCapturedOnly.Local
