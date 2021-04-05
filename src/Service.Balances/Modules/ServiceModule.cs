@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using MyJetWallet.Sdk.Service;
 using MyNoSqlServer.Abstractions;
+using MyServiceBus.Abstractions;
 using MyServiceBus.TcpClient;
 using Service.Balances.Domain.Models;
 using Service.Balances.Jobs;
@@ -18,7 +19,7 @@ namespace Service.Balances.Modules
             var serviceBusClient = new MyServiceBusTcpClient(Program.ReloadedSettings(e => e.SpotServiceBusHostPort), ApplicationEnvironment.HostName);
             builder.RegisterInstance(serviceBusClient).AsSelf().SingleInstance();
 
-            builder.RegisterMeEventSubscriber(serviceBusClient, "wallet-balance", false);
+            builder.RegisterMeEventSubscriber(serviceBusClient, "wallet-balance", TopicQueueType.Permanent);
 
 
             builder.RegisterType<BalanceUpdateJob>().AutoActivate().SingleInstance();
