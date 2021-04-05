@@ -21,7 +21,7 @@ namespace Service.Balances.Postgres
         public BalancesContext(DbContextOptions options) : base(options)
         {
             InitSqlStatement();
-            _activity = MyTelemetry.StartActivity($"Database context {Schema}").AddTag("db-schema", Schema);
+            _activity = MyTelemetry.StartActivity($"Database context {Schema}")?.AddTag("db-schema", Schema);
         }
 
 
