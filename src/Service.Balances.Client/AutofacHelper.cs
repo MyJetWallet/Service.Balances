@@ -14,9 +14,16 @@ namespace Service.Balances.Client
             
             var factory = new BalancesClientFactory(balancesGrpcServiceUrl, subs);
 
-            builder.RegisterInstance(factory.GetWalletBalanceService()).As<IWalletBalanceService>().SingleInstance();
+            builder.RegisterInstance(factory.GetWalletBalanceCachedService()).As<IWalletBalanceService>().SingleInstance();
 
             builder.RegisterInstance(subs).As<IMyNoSqlServerDataReader<WalletBalanceNoSqlEntity>>().SingleInstance();
+        }
+
+        public static void RegisterBalancesClientsWithoutCache(this ContainerBuilder builder, string balancesGrpcServiceUrl)
+        {
+            var factory = new BalancesClientFactory(balancesGrpcServiceUrl, null);
+
+            builder.RegisterInstance(factory.GetWalletBalanceService()).As<IWalletBalanceService>().SingleInstance();
         }
     }
 }

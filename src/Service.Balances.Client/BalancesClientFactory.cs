@@ -21,15 +21,18 @@ namespace Service.Balances.Client
         {
             _reader = reader;
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
             var channel = GrpcChannel.ForAddress(balancesGrpcServiceUrl);
             _channel = channel.Intercept(new PrometheusMetricsInterceptor());
         }
 
-        public IWalletBalanceService GetWalletBalanceService()
+        public IWalletBalanceService GetWalletBalanceCachedService()
         {
             return new WalletBalanceServiceCached(
                 _channel.CreateGrpcService<IWalletBalanceService>(),
                 _reader);
         }
+
+        public IWalletBalanceService GetWalletBalanceService() => _channel.CreateGrpcService<IWalletBalanceService>();
     }
 }

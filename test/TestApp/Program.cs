@@ -28,7 +28,7 @@ namespace TestApp
             await Task.Delay(2000);
             
             var factory = new BalancesClientFactory("http://localhost:80", subs);
-            var client = factory.GetWalletBalanceService();
+            var client = factory.GetWalletBalanceCachedService();
 
             var resp = await client.GetWalletBalancesAsync(new GetWalletBalancesRequest()
             {
