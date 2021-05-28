@@ -34,7 +34,7 @@ namespace Service.Balances
 
             services.AddDatabase(BalancesContext.Schema, Program.Settings.PostgresConnectionString, o => new BalancesContext(o));
 
-            services.AddMyTelemetry(Program.Settings.ZipkinUrl);
+            services.AddMyTelemetry("SP-", Program.Settings.ZipkinUrl);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
